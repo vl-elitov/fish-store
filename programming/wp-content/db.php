@@ -1,0 +1,1 @@
+/home/comp/www/upwork/fish/programming/wp-content/plugins/query-monitor/wp-content/db.php
