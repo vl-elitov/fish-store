@@ -46,6 +46,8 @@ if (!function_exists('fish_setup')) :
         // This theme uses wp_nav_menu() in one location.
         register_nav_menus(array(
             'menu-1' => esc_html__('Primary', 'fish'),
+            'menu-in-footer' => esc_html__('Footer', 'fish'),
+            'social' => esc_html__('Social Menu', 'fish'),
         ));
 
         /*
@@ -80,6 +82,28 @@ if (!function_exists('fish_setup')) :
             'flex-width' => true,
             'flex-height' => true,
         ));
+
+        function add_additional_class_on_li($classes, $item, $args)
+        {
+            if (isset($args->add_li_class) && !empty($args->add_li_class)) {
+                $classes[] = $args->add_li_class;
+            }
+            return $classes;
+        }
+
+        add_filter('nav_menu_css_class', 'add_additional_class_on_li', 1, 3);
+
+        function my_acf_google_map_api($api)
+        {
+
+            $api['key'] = 'xxx';
+
+            return $api;
+
+        }
+
+        add_filter('acf/fields/google_map/api', 'my_acf_google_map_api');
+
     }
 endif;
 add_action('after_setup_theme', 'fish_setup');
@@ -154,10 +178,51 @@ require get_template_directory() . '/inc/template-functions.php';
  */
 require get_template_directory() . '/inc/customizer.php';
 
-/**
- * Load Jetpack compatibility file.
- */
-if (defined('JETPACK__VERSION')) {
-    require get_template_directory() . '/inc/jetpack.php';
+/*
+ * My classes
+ * */
+//require get_template_directory() . '/inc/classes/AllClasses.php';
+function register_my_product()
+{
+
+    /**
+     * Post Type: Products.
+     */
+
+    $labels = array(
+        "name" => __("Products", "fish"),
+        "singular_name" => __("Product", "fish"),
+    );
+
+    $args = array(
+        'label' => __('Products', 'fish'),
+        'labels' => $labels,
+        'description' => '',
+        'public' => true,
+        'publicly_queryable' => true,
+        'show_ui' => true,
+        'delete_with_user' => false,
+        'show_in_rest' => true,
+        'rest_base' => '',
+        'rest_controller_class' => 'WP_REST_Posts_Controller',
+        'has_archive' => false,
+        'show_in_menu' => true,
+        'show_in_nav_menus' => true,
+        'exclude_from_search' => false,
+        'capability_type' => 'post',
+        'map_meta_cap' => true,
+        'hierarchical' => false,
+        'rewrite' => array('slug' => 'Product', 'with_front' => true),
+        'query_var' => true,
+        'supports' => array('title', 'editor', 'thumbnail'),
+    );
+
+    register_post_type("Product", $args);
 }
 
+add_action('init', 'register_my_product');
+
+/**
+ * Walker social menu
+ */
+require get_template_directory() . '/classes/WalkerSocialMenu.php';
